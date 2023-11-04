@@ -22,6 +22,14 @@ const Navbar = () => {
               >
                 Pricing
               </Link>
+              <Link
+                href="/register"
+                className={buttonVariants({
+                  size: "sm",
+                })}
+              >
+                Sign in
+              </Link>
             </>
           </div>
         </div>
