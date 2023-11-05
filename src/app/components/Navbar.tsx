@@ -1,6 +1,7 @@
 import Link from "next/link";
 import MaxWidthWrapper from "./MaxWidthWrapper";
 import { buttonVariants } from "./ui/button";
+import { ArrowRight } from "lucide-react";
 
 const Navbar = () => {
   return (
@@ -28,7 +29,7 @@ const Navbar = () => {
                   size: "sm",
                 })}
               >
-                Sign in
+                Sign in <ArrowRight className="ml-1.5 h-5 w-5" />
               </Link>
             </>
           </div>
