@@ -3,7 +3,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { cn } from "./lib/utils";
 import Navbar from "./components/Navbar";
-import Providers from "./components/Providers";
+import Providers from "./components/Providers/Providers";
+import { AuthProvider } from "./context/authContex";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,15 +20,17 @@ export default function RootLayout({
   return (
     <html lang="en" className="light">
       <Providers>
-        <body
-          className={cn(
-            "min-h-screen font-sans antialiased grainy",
-            inter.className
-          )}
-        >
-          <Navbar />
-          {children}
-        </body>
+        <AuthProvider>
+          <body
+            className={cn(
+              "min-h-screen font-sans antialiased grainy",
+              inter.className
+            )}
+          >
+            <Navbar />
+            {children}
+          </body>
+        </AuthProvider>
       </Providers>
     </html>
   );

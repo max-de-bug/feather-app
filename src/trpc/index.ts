@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { TRPCError } from "@trpc/server";
-import { publicProcedure, router } from "./trpc";
+import { privateProcedure, publicProcedure, router } from "./trpc";
 
 type User = {
   id: string;
@@ -28,6 +28,9 @@ export const appRouter = router({
     }
 
     return dbUser; // Return the found user
+  }),
+  getUserFiles: privateProcedure.query(({ ctx }) => {
+    const { user, userId } = ctx;
   }),
 });
 

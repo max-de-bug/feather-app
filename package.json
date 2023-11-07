@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.5.2",
+    "@radix-ui/react-dialog": "^1.0.5",
     "@radix-ui/react-label": "^2.0.2",
     "@radix-ui/react-slot": "^1.0.2",
     "@tailwindcss/typography": "^0.5.10",
@@ -20,8 +21,10 @@
     "@trpc/server": "^10.43.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.291.0",
     "next": "14.0.1",
+    "nookies": "^2.5.2",
     "react": "^18",
     "react-dom": "^18",
     "tailwind-merge": "^2.0.0",
