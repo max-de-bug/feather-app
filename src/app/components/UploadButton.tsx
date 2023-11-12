@@ -13,8 +13,10 @@ import Dropzone from "react-dropzone";
 
 import { Cloud, File } from "lucide-react";
 import { Progress } from "./ui/progress";
+import { trpc } from "./_trpc/client";
 
 const UploadDropzone = () => {
+  const { mutate: uploadFile } = trpc.uploadFile.useMutation({});
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const startSimulatedProgress = () => {

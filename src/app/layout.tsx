@@ -22,8 +22,8 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="light">
-      <Providers>
-        <AuthProvider>
+      <AuthProvider>
+        <Providers>
           <body
             className={cn(
               "min-h-screen font-sans antialiased grainy",
@@ -33,8 +33,8 @@ export default function RootLayout({
             <Navbar />
             {children}
           </body>
-        </AuthProvider>
-      </Providers>
+        </Providers>
+      </AuthProvider>
     </html>
   );
 }

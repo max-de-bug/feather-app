@@ -20,6 +20,7 @@
     "@trpc/next": "^10.43.1",
     "@trpc/react-query": "^10.43.1",
     "@trpc/server": "^10.43.1",
+    "aws-sdk": "^2.1494.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.0.0",
     "data-fns": "^1.1.0",

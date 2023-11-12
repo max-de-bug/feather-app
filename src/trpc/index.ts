@@ -4,6 +4,17 @@ import { privateProcedure, publicProcedure, router } from "./trpc";
 import { useContext } from "react";
 import { AuthContext } from "@/app/context/authContex"; // Make sure this path is correct
 import { z } from "zod";
+import S3 from "aws-sdk/clients/s3";
+
+import { randomUUID } from "crypto";
+
+const s3 = new S3({
+  apiVersion: "2006-03-01",
+  accessKeyId: process.env.ACCESS_KEY,
+  secretAccessKey: process.env.SECRET_KEY,
+  region: process.env.REGION,
+  signatureVersion: "v4",
+});
 
 type User = {
   id: string;
@@ -47,6 +58,41 @@ export const appRouter = router({
       },
     });
   }),
+  uploadFile: privateProcedure.mutation(async (ctx) => {
+    const ex = (req.query.fileType as string).split("/")[1]; // Use ctx.input
+    const key = `${randomUUID()}.${ex}`;
+
+    const s3Params = {
+      Bucket: process.env.BUCKET_NAME,
+      Key: key, // Corrected to 'Key' from 'key'
+      Expires: 60,
+      ContentType: `image/${ex}`,
+    };
+    const uploadUrl = await s3.getSignedUrl("putObject", s3Params);
+    return {
+      uploadUrl,
+      key,
+    };
+  }),
+	getStandardUploadPresignedUrl: privateProcedure
+	.input(z.object({ key: z.string() }))
+	.mutation(async ({ ctx, input }) => {
+		const { key } = input;
+		const { s3 } = ctx;
+
+		const s3Params = {
+      Bucket: process.env.BUCKET_NAME,
+      Key: key, // Corrected to 'Key' from 'key'
+      Expires: 60,
+      ContentType: `image/${ex}`,
+    };
+    const uploadUrl = await s3.getSignedUrl("putObject", s3Params);
+    return {
+      uploadUrl,
+      key,
+    };
+	}),
+});
   deleteFile: privateProcedure
     .input(z.object({ id: z.string() }))
     .mutation(async (ctx) => {
