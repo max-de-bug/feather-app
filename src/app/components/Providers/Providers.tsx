@@ -17,7 +17,7 @@ const Providers = ({ children }: PropsWithChildren) => {
     })
   );
   return (
-    <trpc.Provider client={trpcClient} query={queryClient}>
+    <trpc.Provider client={trpcClient} queryClient={queryClient}>
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     </trpc.Provider>
   );

@@ -24,27 +24,27 @@ type User = {
 // const user = useContext(AuthContext); // Make sure you are using useContext within a component
 
 export const appRouter = router({
-  authCallback: publicProcedure.query<User>(async (user) => {
-    if (!user.id || !user.email) {
-      throw new TRPCError({ code: "UNAUTHORIZED" });
-    }
-    const dbUser = await db.user.findFirst({
-      where: {
-        id: user.id,
-      },
-    });
-    if (!dbUser) {
-      const newUser = await db.user.create({
-        data: {
-          id: user.id,
-          email: user.email,
-        },
-      });
-      return newUser; // Return the created user
-    }
+  // authCallback: publicProcedure.query<User>(async (user) => {
+  //   if (!user.id || !user.email) {
+  //     throw new TRPCError({ code: "UNAUTHORIZED" });
+  //   }
+  //   const dbUser = await db.user.findFirst({
+  //     where: {
+  //       id: user.id,
+  //     },
+  //   });
+  //   if (!dbUser) {
+  //     const newUser = await db.user.create({
+  //       data: {
+  //         id: user.id,
+  //         email: user.email,
+  //       },
+  //     });
+  //     return newUser; // Return the created user
+  //   }
 
-    return dbUser; // Return the found user
-  }),
+  //   return dbUser; // Return the found user
+  // }),
   // registerUser: publicProcedure.mutation<User>(async ({ ctx, input }) => {
   //   // Here you can register the user with the provided email and password
   //   const { email, password } = input;
@@ -54,48 +54,47 @@ export const appRouter = router({
 
     return await db.file.findMany({
       where: {
-        userId: "1",
+        userId: userId,
       },
     });
   }),
-  uploadFile: privateProcedure.mutation(async (ctx) => {
-    const ex = (req.query.fileType as string).split("/")[1]; // Use ctx.input
-    const key = `${randomUUID()}.${ex}`;
+  // uploadFile: privateProcedure.mutation(async (ctx) => {
+  //   const ex = (req.query.fileType as string).split("/")[1]; // Use ctx.input
+  //   const key = `${randomUUID()}.${ex}`;
 
-    const s3Params = {
-      Bucket: process.env.BUCKET_NAME,
-      Key: key, // Corrected to 'Key' from 'key'
-      Expires: 60,
-      ContentType: `image/${ex}`,
-    };
-    const uploadUrl = await s3.getSignedUrl("putObject", s3Params);
-    return {
-      uploadUrl,
-      key,
-    };
-  }),
-	getStandardUploadPresignedUrl: privateProcedure
-	.input(z.object({ key: z.string() }))
-	.mutation(async ({ ctx, input }) => {
-		const { key } = input;
-		const { s3 } = ctx;
+  //   const s3Params = {
+  //     Bucket: process.env.BUCKET_NAME,
+  //     Key: key, // Corrected to 'Key' from 'key'
+  //     Expires: 60,
+  //     ContentType: `image/${ex}`,
+  //   };
+  //   const uploadUrl = await s3.getSignedUrl("putObject", s3Params);
+  //   return {
+  //     uploadUrl,
+  //     key,
+  //   };
+  // }),
+  uploadFile: privateProcedure
+    .input(z.object({ key: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const { key } = input;
+      const { s3 } = ctx;
 
-		const s3Params = {
-      Bucket: process.env.BUCKET_NAME,
-      Key: key, // Corrected to 'Key' from 'key'
-      Expires: 60,
-      ContentType: `image/${ex}`,
-    };
-    const uploadUrl = await s3.getSignedUrl("putObject", s3Params);
-    return {
-      uploadUrl,
-      key,
-    };
-	}),
-});
+      const s3Params = {
+        Bucket: process.env.BUCKET_NAME,
+        Key: key, // Corrected to 'Key' from 'key'
+        Expires: 60,
+        ContentType: "application/pdf",
+      };
+      const uploadUrl = await s3.getSignedUrl("putObject", s3Params);
+      return {
+        uploadUrl,
+        key,
+      };
+    }),
   deleteFile: privateProcedure
     .input(z.object({ id: z.string() }))
-    .mutation(async (ctx) => {
+    .mutation(async ({ input, ctx }) => {
       const { userId } = ctx;
       const file = await db.file.findFirst({
         where: {

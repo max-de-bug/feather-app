@@ -36,11 +36,28 @@ const UploadDropzone = () => {
   return (
     <Dropzone
       multiple={false}
-      onDrop={(acceptedFile) => {
+      onDrop={async (acceptedFile) => {
         setIsUploading(true);
         const progressInterval = startSimulatedProgress();
-        clearInterval(progressInterval);
-        setUploadProgress(100);
+        try {
+          // Call tRPC mutation to upload the file
+          const { data: file } = await uploadFile({
+            key: acceptedFile[0]?.name, // Assuming only one file is dropped
+          });
+
+          console.log("File uploaded:", file);
+
+          console.log("File uploaded:", file);
+
+          // Handle success (e.g., update UI, redirect, etc.)
+        } catch (error) {
+          console.error("File upload failed:", error);
+          // Handle error (e.g., show error message)
+        } finally {
+          clearInterval(progressInterval);
+          setUploadProgress(100);
+          setIsUploading(false);
+        }
       }}
     >
       {({ getRootProps, getInputProps, acceptedFiles }) => (
