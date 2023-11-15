@@ -14,11 +14,18 @@ import Dropzone from "react-dropzone";
 import { Cloud, File } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { trpc } from "./_trpc/client";
+import { useRouter } from "next/navigation";
 
 const UploadDropzone = () => {
-  const { mutate: uploadFile } = trpc.uploadFile.useMutation({});
+  const router = useRouter();
+  const { mutate: uploadFile } = trpc.uploadFile.useMutation({
+    // onSuccess: (uploadUrl) => {
+    //   router.push(`/dashboard/${uploadUrl}`);
+    // },
+  });
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [presignedUrl, setPresignedUrl] = useState<string | null>(null);
   const startSimulatedProgress = () => {
     setUploadProgress(0);
     const interval = setInterval(() => {
@@ -40,19 +47,12 @@ const UploadDropzone = () => {
         setIsUploading(true);
         const progressInterval = startSimulatedProgress();
         try {
-          // Call tRPC mutation to upload the file
-          const { data: file } = await uploadFile({
-            key: acceptedFile[0]?.name, // Assuming only one file is dropped
+          const result = await uploadFile({
+            key: acceptedFile[0]?.name,
           });
-
-          console.log("File uploaded:", file);
-
-          console.log("File uploaded:", file);
-
-          // Handle success (e.g., update UI, redirect, etc.)
+          console.log(result);
         } catch (error) {
           console.error("File upload failed:", error);
-          // Handle error (e.g., show error message)
         } finally {
           clearInterval(progressInterval);
           setUploadProgress(100);

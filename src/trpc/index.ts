@@ -7,6 +7,8 @@ import { z } from "zod";
 import S3 from "aws-sdk/clients/s3";
 
 import { randomUUID } from "crypto";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const s3 = new S3({
   apiVersion: "2006-03-01",
@@ -78,19 +80,22 @@ export const appRouter = router({
     .input(z.object({ key: z.string() }))
     .mutation(async ({ ctx, input }) => {
       const { key } = input;
-      const { s3 } = ctx;
+      const s3 = new S3Client({
+        region: process.env.REGION!,
+        credentials: {
+          accessKeyId: process.env.ACCESS_KEY!,
+          secretAccessKey: process.env.SECRET_KEY!,
+        },
+      });
 
-      const s3Params = {
-        Bucket: process.env.BUCKET_NAME,
-        Key: key, // Corrected to 'Key' from 'key'
-        Expires: 60,
-        ContentType: "application/pdf",
-      };
-      const uploadUrl = await s3.getSignedUrl("putObject", s3Params);
-      return {
-        uploadUrl,
-        key,
-      };
+      const putObjectCommand = new PutObjectCommand({
+        Bucket: process.env.BUCKET_NAME!,
+        Key: key,
+      });
+      const signedURL = await getSignedUrl(s3, putObjectCommand, {
+        expiresIn: 60,
+      });
+      return signedURL;
     }),
   deleteFile: privateProcedure
     .input(z.object({ id: z.string() }))

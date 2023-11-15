@@ -1,4 +1,4 @@
-import { s3 } from "./aws/s3";
+// import { s3 } from "./aws/s3";
 import { AuthContext } from "@/app/context/authContex";
 import { TRPCError, initTRPC } from "@trpc/server";
 import { useContext } from "react";
@@ -15,7 +15,7 @@ const isAuth = middleware(async (opts) => {
   return opts.next({
     ctx: {
       userId,
-      s3: s3,
+      // s3: s3,
     },
   });
 });
