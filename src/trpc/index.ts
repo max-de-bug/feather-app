@@ -90,7 +90,7 @@ export const appRouter = router({
 
       const putObjectCommand = new PutObjectCommand({
         Bucket: process.env.BUCKET_NAME!,
-        Key: key,
+        Key: "test.pdf",
       });
       const signedURL = await getSignedUrl(s3, putObjectCommand, {
         expiresIn: 60,

@@ -18,7 +18,7 @@ import { useRouter } from "next/navigation";
 
 const UploadDropzone = () => {
   const router = useRouter();
-  const { mutate: uploadFile } = trpc.uploadFile.useMutation({
+  const { mutateAsync: fetchPresignedUrl } = trpc.uploadFile.useMutation({
     // onSuccess: (uploadUrl) => {
     //   router.push(`/dashboard/${uploadUrl}`);
     // },
@@ -47,10 +47,14 @@ const UploadDropzone = () => {
         setIsUploading(true);
         const progressInterval = startSimulatedProgress();
         try {
-          const result = await uploadFile({
+          fetchPresignedUrl({
             key: acceptedFile[0]?.name,
-          });
-          console.log(result);
+          })
+            .then((url) => {
+              setPresignedUrl(url);
+              console.log(url);
+            })
+            .catch((err) => console.error(err));
         } catch (error) {
           console.error("File upload failed:", error);
         } finally {
