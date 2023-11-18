@@ -6,7 +6,7 @@ import { AuthContext } from "@/app/context/authContex"; // Make sure this path i
 import { z } from "zod";
 import S3 from "aws-sdk/clients/s3";
 
-import { randomUUID } from "crypto";
+import crypto from "crypto";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
@@ -23,6 +23,8 @@ type User = {
   email: string;
 };
 
+const generateFileName = (bytes = 32) =>
+  crypto.randomBytes(bytes).toString("hex");
 // const user = useContext(AuthContext); // Make sure you are using useContext within a component
 
 export const appRouter = router({
@@ -77,9 +79,28 @@ export const appRouter = router({
   //   };
   // }),
   uploadFile: privateProcedure
-    .input(z.object({ key: z.string() }))
+    .input(
+      z.object({
+        file: z.object({
+          key: z.string(),
+          name: z.string(),
+          size: z.number(),
+          checksum: z.string(),
+        }),
+      })
+    )
     .mutation(async ({ ctx, input }) => {
-      const { key } = input;
+      const { userId } = ctx;
+      const { key, name, size, checksum } = input.file;
+      const maxFileSize = 1024 * 1024 * 4;
+      const acceptedType = "pdf";
+      if (size > maxFileSize) {
+        return { failure: "File too large" };
+      }
+      if (!key.includes(acceptedType)) {
+        throw new TRPCError({ code: "FORBIDDEN" });
+      }
+
       const s3 = new S3Client({
         region: process.env.REGION!,
         credentials: {
@@ -90,12 +111,34 @@ export const appRouter = router({
 
       const putObjectCommand = new PutObjectCommand({
         Bucket: process.env.BUCKET_NAME!,
-        Key: "test.pdf",
+        Key: generateFileName(),
+        ContentType: key,
+        ContentLength: size,
+        ChecksumSHA256: checksum,
+        Metadata: {
+          userId: userId,
+        },
       });
       const signedURL = await getSignedUrl(s3, putObjectCommand, {
         expiresIn: 60,
       });
-      return signedURL;
+      // const file = await db.file.findFirst({
+      //   where: {
+      //     key: key,
+      //     userId,
+      //   },
+      // });
+
+      const newFile = await db.file.create({
+        data: {
+          key: key,
+          name: name,
+          userId: userId,
+          uploadStatus: "PROCESSING",
+          url: signedURL.split("?")[0],
+        },
+      });
+      return { signedURL, newFile };
     }),
   deleteFile: privateProcedure
     .input(z.object({ id: z.string() }))

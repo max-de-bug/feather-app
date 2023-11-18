@@ -7,6 +7,7 @@ import Providers from "./components/Providers/Providers";
 import { AuthProvider } from "./context/authContex";
 
 import "react-loading-skeleton/dist/skeleton.css";
+import { Toaster } from "./components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,6 +31,7 @@ export default function RootLayout({
               inter.className
             )}
           >
+            <Toaster />
             <Navbar />
             {children}
           </body>

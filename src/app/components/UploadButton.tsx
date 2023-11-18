@@ -8,13 +8,14 @@ import {
   DialogTrigger,
 } from "./ui/dialog";
 import { Button } from "./ui/button";
-
 import Dropzone from "react-dropzone";
+import axios from "axios";
 
-import { Cloud, File } from "lucide-react";
+import { Cloud, File, Loader2 } from "lucide-react";
 import { Progress } from "./ui/progress";
 import { trpc } from "./_trpc/client";
 import { useRouter } from "next/navigation";
+import { useToast } from "./ui/use-toast";
 
 const UploadDropzone = () => {
   const router = useRouter();
@@ -22,7 +23,10 @@ const UploadDropzone = () => {
     // onSuccess: (uploadUrl) => {
     //   router.push(`/dashboard/${uploadUrl}`);
     // },
+    // retry: true,
+    // retryDelay: 500,
   });
+  const { toast } = useToast();
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [uploadProgress, setUploadProgress] = useState<number>(0);
   const [presignedUrl, setPresignedUrl] = useState<string | null>(null);
@@ -40,6 +44,15 @@ const UploadDropzone = () => {
     return interval;
   };
 
+  const computeSHA256 = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    const hashHex = hashArray
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+    return hashHex;
+  };
   return (
     <Dropzone
       multiple={false}
@@ -47,14 +60,39 @@ const UploadDropzone = () => {
         setIsUploading(true);
         const progressInterval = startSimulatedProgress();
         try {
-          fetchPresignedUrl({
-            key: acceptedFile[0]?.name,
-          })
-            .then((url) => {
-              setPresignedUrl(url);
-              console.log(url);
-            })
-            .catch((err) => console.error(err));
+          const checksum = await computeSHA256(acceptedFile[0]);
+          const result = await fetchPresignedUrl({
+            file: {
+              key: acceptedFile[0].name,
+              name: acceptedFile[0].name,
+              size: acceptedFile[0].size,
+              checksum,
+            },
+          });
+
+          const { signedURL, newFile } = result;
+          console.log(signedURL);
+          console.log(newFile.id);
+
+          if (acceptedFile.length > 0 && signedURL !== null) {
+            const file = acceptedFile[0] as File;
+
+            try {
+              const response = await axios.put(signedURL, file.slice(), {
+                headers: { "Content-Type": file.type },
+              });
+
+              console.log(response);
+              console.log("Successfully uploaded ", file.name);
+            } catch (err) {
+              console.error(err);
+              toast({
+                title: "Something went wrong",
+                description: "Please try again later",
+                variant: "destructive",
+              });
+            }
+          }
         } catch (error) {
           console.error("File upload failed:", error);
         } finally {
@@ -95,11 +133,26 @@ const UploadDropzone = () => {
               {isUploading ? (
                 <div className="w-full mt-4 max-w-xs mx-auto">
                   <Progress
+                    indicatorColor={
+                      uploadProgress === 100 ? "bg-green-500" : ""
+                    }
                     value={uploadProgress}
                     className="h-1 w-full bg-zinc-200"
                   />
+                  {uploadProgress === 100 ? (
+                    <div className="flex gap-1 items-center justify-center text-sm text-zinc-700 text-center pt-2">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Redirecting...
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
+              <input
+                {...getInputProps()}
+                type="file"
+                id="dropzone-file"
+                className="hidden"
+              />
             </label>
           </div>
         </div>
