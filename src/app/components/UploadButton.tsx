@@ -20,11 +20,11 @@ import { useToast } from "./ui/use-toast";
 const UploadDropzone = () => {
   const router = useRouter();
   const { mutateAsync: fetchPresignedUrl } = trpc.uploadFile.useMutation({
-    // onSuccess: (uploadUrl) => {
-    //   router.push(`/dashboard/${uploadUrl}`);
-    // },
-    // retry: true,
-    // retryDelay: 500,
+    onSuccess: (uploadUrl) => {
+      router.push(`/dashboard/${uploadUrl.newFile.id}`);
+    },
+    retry: true,
+    retryDelay: 500,
   });
   const { toast } = useToast();
   const [isUploading, setIsUploading] = useState<boolean>(false);

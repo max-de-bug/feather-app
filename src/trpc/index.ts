@@ -7,21 +7,32 @@ import { z } from "zod";
 import S3 from "aws-sdk/clients/s3";
 
 import crypto from "crypto";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import {
+  PutObjectCommand,
+  S3Client,
+  DeleteObjectCommand,
+} from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-const s3 = new S3({
-  apiVersion: "2006-03-01",
-  accessKeyId: process.env.ACCESS_KEY,
-  secretAccessKey: process.env.SECRET_KEY,
-  region: process.env.REGION,
-  signatureVersion: "v4",
-});
+// const s3 = new S3({
+//   apiVersion: "2006-03-01",
+//   accessKeyId: process.env.ACCESS_KEY,
+//   secretAccessKey: process.env.SECRET_KEY,
+//   region: process.env.REGION,
+//   signatureVersion: "v4",
+// });
 
 type User = {
   id: string;
   email: string;
 };
+const s3 = new S3Client({
+  region: process.env.REGION!,
+  credentials: {
+    accessKeyId: process.env.ACCESS_KEY!,
+    secretAccessKey: process.env.SECRET_KEY!,
+  },
+});
 
 const generateFileName = (bytes = 32) =>
   crypto.randomBytes(bytes).toString("hex");
@@ -95,19 +106,19 @@ export const appRouter = router({
       const maxFileSize = 1024 * 1024 * 4;
       const acceptedType = "pdf";
       if (size > maxFileSize) {
-        return { failure: "File too large" };
+        throw new TRPCError({ code: "FORBIDDEN" });
       }
       if (!key.includes(acceptedType)) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
 
-      const s3 = new S3Client({
-        region: process.env.REGION!,
-        credentials: {
-          accessKeyId: process.env.ACCESS_KEY!,
-          secretAccessKey: process.env.SECRET_KEY!,
-        },
-      });
+      // const s3 = new S3Client({
+      //   region: process.env.REGION!,
+      //   credentials: {
+      //     accessKeyId: process.env.ACCESS_KEY!,
+      //     secretAccessKey: process.env.SECRET_KEY!,
+      //   },
+      // });
 
       const putObjectCommand = new PutObjectCommand({
         Bucket: process.env.BUCKET_NAME!,
@@ -147,15 +158,38 @@ export const appRouter = router({
       const file = await db.file.findFirst({
         where: {
           id: input.id,
-          userId,
         },
       });
+
       if (!file) throw new TRPCError({ code: "NOT_FOUND" });
       await db.file.delete({
         where: {
           id: input.id,
         },
       });
+      // const s3 = new S3Client({
+      //   region: process.env.REGION!,
+      //   credentials: {
+      //     accessKeyId: process.env.ACCESS_KEY!,
+      //     secretAccessKey: process.env.SECRET_KEY!,
+      //   },
+      // });
+      if (file) {
+        const url = file.url;
+        const key = url.split("/").slice(-1)[0];
+        console.log(key);
+        const deleteParams = {
+          Bucket: process.env.BUCKET_NAME!,
+          Key: key,
+        };
+        await s3
+          .send(new DeleteObjectCommand(deleteParams))
+          .then((response) => console.log("Delete response:", response))
+          .catch((error) => console.error("Delete error:", error));
+
+        console.log("After delete operation");
+      }
+
       return file;
     }),
 });
