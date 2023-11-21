@@ -7,6 +7,7 @@ import Providers from "./components/Providers/Providers";
 import { AuthProvider } from "./context/authContex";
 
 import "react-loading-skeleton/dist/skeleton.css";
+import "simplebar-react/dist/simplebar.min.css";
 import { Toaster } from "./components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
