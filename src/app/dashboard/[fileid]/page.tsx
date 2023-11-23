@@ -1,4 +1,4 @@
-import ChatWrapper from "@/app/components/ChatWrapper";
+import ChatWrapper from "@/app/components/chat/ChatWrapper";
 import PdfRenderer from "@/app/components/PdfRenderer";
 import { AuthContext } from "@/app/context/authContex";
 import { db } from "@/db";
@@ -31,7 +31,7 @@ const Page = async ({ params }: PageProps) => {
           </div>
         </div>
         <div className="shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0">
-          <ChatWrapper />
+          <ChatWrapper fileId={file.id} />
         </div>
       </div>
     </div>

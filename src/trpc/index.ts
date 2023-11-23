@@ -5,7 +5,9 @@ import { useContext } from "react";
 import { AuthContext } from "@/app/context/authContex"; // Make sure this path is correct
 import { z } from "zod";
 import S3 from "aws-sdk/clients/s3";
-
+import { PDFLoader } from "langchain/document_loaders/fs/pdf";
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
+import { PineconeStore } from "langchain/vectorstores/pinecone";
 import crypto from "crypto";
 import {
   PutObjectCommand,
@@ -13,6 +15,7 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { getPineconeClient, pinecone } from "@/app/lib/pinecone";
 
 // const s3 = new S3({
 //   apiVersion: "2006-03-01",
@@ -149,6 +152,41 @@ export const appRouter = router({
           url: signedURL.split("?")[0],
         },
       });
+      try {
+        const response = await fetch(signedURL);
+        const blob = await response.blob();
+        const loader = new PDFLoader(blob);
+        const pageLevelDocs = await loader.load();
+        const pageAmt = pageLevelDocs.length;
+        // vectorize and index entire document
+        const pinecone = await getPineconeClient();
+        const pineconeIndex = pinecone.index("feather");
+        const embeddings = new OpenAIEmbeddings({
+          openAIApiKey: process.env.OPEN_AI_KEY!,
+        });
+        await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
+          pineconeIndex,
+          namespace: newFile.id,
+        });
+
+        await db.file.update({
+          data: {
+            uploadStatus: "SUCCESS",
+          },
+          where: {
+            id: newFile.id,
+          },
+        });
+      } catch (error) {
+        await db.file.update({
+          data: {
+            uploadStatus: "FAILED",
+          },
+          where: {
+            id: newFile.id,
+          },
+        });
+      }
       return { signedURL, newFile };
     }),
   deleteFile: privateProcedure
@@ -191,6 +229,18 @@ export const appRouter = router({
       }
 
       return file;
+    }),
+  getFileUploadStatus: privateProcedure
+    .input(z.object({ fileId: z.string() }))
+    .query(async ({ input, ctx }) => {
+      const file = await db.file.findFirst({
+        where: {
+          id: input.fileId,
+          userId: ctx.userId,
+        },
+      });
+      if (!file) return { status: "PENDING" as const };
+      return { status: file.uploadStatus };
     }),
 });
 export type AppRouter = typeof appRouter;
