@@ -15,7 +15,8 @@ import {
   DeleteObjectCommand,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { getPineconeClient, pinecone } from "@/app/lib/pinecone";
+import { getPineconeClient } from "@/app/lib/pinecone";
+import { INFINITE_QUERY_LIMIT } from "@/config/infinite-query";
 
 // const s3 = new S3({
 //   apiVersion: "2006-03-01",
@@ -160,7 +161,7 @@ export const appRouter = router({
         const pageAmt = pageLevelDocs.length;
         // vectorize and index entire document
         const pinecone = await getPineconeClient();
-        const pineconeIndex = pinecone.index("feather");
+        const pineconeIndex = pinecone.Index("feather");
         const embeddings = new OpenAIEmbeddings({
           openAIApiKey: process.env.OPEN_AI_KEY!,
         });
@@ -241,6 +242,51 @@ export const appRouter = router({
       });
       if (!file) return { status: "PENDING" as const };
       return { status: file.uploadStatus };
+    }),
+  getFileMessages: privateProcedure
+    .input(
+      z.object({
+        limit: z.number().min(1).max(100).nullish(),
+        cursor: z.string().nullish(),
+        fileId: z.string(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { userId } = ctx;
+      const { fileId, cursor } = input;
+      const limit = input.limit ?? INFINITE_QUERY_LIMIT;
+      const file = await db.file.findFirst({
+        where: {
+          id: fileId,
+          userId,
+        },
+      });
+      if (!file) throw new TRPCError({ code: "NOT_FOUND" });
+      const messages = await db.message.findMany({
+        take: limit + 1,
+        where: {
+          fileId,
+        },
+        orderBy: {
+          createdAt: "desc",
+        },
+        cursor: cursor ? { id: cursor } : undefined,
+        select: {
+          id: true,
+          isUserMessage: true,
+          createdAt: true,
+          text: true,
+        },
+      });
+      let nextCursor: typeof cursor | undefined = undefined;
+      if (messages.length > limit) {
+        const nextItem = messages.pop();
+        nextCursor = nextItem?.id;
+      }
+      return {
+        messages,
+        nextCursor,
+      };
     }),
 });
 export type AppRouter = typeof appRouter;
