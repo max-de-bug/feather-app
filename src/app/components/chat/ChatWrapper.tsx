@@ -5,7 +5,7 @@ import ChatInput from "./ChatInput";
 import Messages from "./Messages";
 import Link from "next/link";
 import { buttonVariants } from "../ui/button";
-import { ChatContextProvider } from "./ChatContext";
+import { ChatContext, ChatContextProvider } from "./ChatContext";
 
 interface ChatWrapperProps {
   fileId: string;

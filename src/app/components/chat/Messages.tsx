@@ -4,14 +4,14 @@ import { Loader2, MessageSquareIcon } from "lucide-react";
 import Skeleton from "react-loading-skeleton";
 import Message from "./Message";
 import { useContext, useEffect, useRef } from "react";
-import { chatContext } from "./ChatContext";
+import { ChatContext } from "./ChatContext";
 import { useIntersection } from "@mantine/hooks";
 interface MessagesProps {
   fileId: string;
 }
 
 const Messages = ({ fileId }: MessagesProps) => {
-  const { isLoading: isAiThinking } = useContext(chatContext);
+  const { isLoading: isAiThinking } = useContext(ChatContext);
 
   const { data, isLoading, fetchNextPage } =
     trpc.getFileMessages.useInfiniteQuery(

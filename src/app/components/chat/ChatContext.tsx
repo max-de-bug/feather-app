@@ -11,7 +11,7 @@ type StreamResponse = {
   isLoading: boolean;
 };
 
-export const chatContext = createContext<StreamResponse>({
+export const ChatContext = createContext<StreamResponse>({
   addMessage: () => {},
   message: "",
   handleInputChange: () => {},
@@ -122,7 +122,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
               if (page === old.pages[0]) {
                 let updatedMessages;
                 if (!isAiResponseCreated) {
-                  updatedMessage = [
+                  updatedMessages = [
                     {
                       createdAt: new Date().toISOString(),
                       id: "ai-response",
@@ -171,7 +171,7 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
   };
   const addMessage = () => sendMessage({ message });
   return (
-    <ChatContext.Provide
+    <ChatContext.Provider
       value={{
         addMessage,
         message,
@@ -180,6 +180,6 @@ export const ChatContextProvider = ({ fileId, children }: Props) => {
       }}
     >
       {children}
-    </ChatContext.Provide>
+    </ChatContext.Provider>
   );
 };

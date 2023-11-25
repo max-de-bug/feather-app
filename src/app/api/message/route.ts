@@ -28,10 +28,12 @@ export const POST = async (req: NextRequest) => {
 
   if (!file) return new Response("Not found", { status: 404 });
   await db.message.create({
-    text: message,
-    isUserMessage: true,
-    userId: "1",
-    fileId,
+    data: {
+      text: message,
+      isUserMessage: true,
+      userId: "1",
+      fileId,
+    },
   });
   // vectorize message
 
@@ -43,7 +45,7 @@ export const POST = async (req: NextRequest) => {
 
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
     pineconeIndex,
-    namespace: file.id,
+    namespace: fileId,
   });
   const results = await vectorStore.similaritySearch(message, 4);
   const prevMessage = await db.message.findMany({
