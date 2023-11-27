@@ -72,6 +72,7 @@ export const appRouter = router({
   //   // Here you can register the user with the provided email and password
   //   const { email, password } = input;
   // }),
+
   getUserFiles: privateProcedure.query(async ({ ctx }) => {
     const { userId } = ctx;
 
@@ -111,9 +112,13 @@ export const appRouter = router({
     .mutation(async ({ ctx, input }) => {
       const { userId } = ctx;
       const { key, name, size, checksum } = input.file;
-      const maxFileSize = 1024 * 1024 * 4;
+      const subscriptionPlan = await getUserSubscriptionPlan();
+      const { isSubscribed } = subscriptionPlan;
+
+      const maxFileSizeFreePlan = 1024 * 1024 * 4; // 4MB
+      const maxFileSizeProPlan = 1024 * 1024 * 16; // 16MB
       const acceptedType = "pdf";
-      if (size > maxFileSize) {
+      if (size > maxFileSizeFreePlan) {
         throw new TRPCError({ code: "FORBIDDEN" });
       }
       if (!key.includes(acceptedType)) {
@@ -128,6 +133,13 @@ export const appRouter = router({
       //   },
       // });
 
+      const isFileExists = await db.file.findFirst({
+        where: {
+          key: key,
+          userId,
+        },
+      });
+      if (isFileExists) return;
       const putObjectCommand = new PutObjectCommand({
         Bucket: process.env.BUCKET_NAME!,
         Key: generateFileName(),
@@ -141,12 +153,6 @@ export const appRouter = router({
       const signedURL = await getSignedUrl(s3, putObjectCommand, {
         expiresIn: 60,
       });
-      // const file = await db.file.findFirst({
-      //   where: {
-      //     key: key,
-      //     userId,
-      //   },
-      // });
 
       const newFile = await db.file.create({
         data: {
@@ -162,7 +168,24 @@ export const appRouter = router({
         const blob = await response.blob();
         const loader = new PDFLoader(blob);
         const pageLevelDocs = await loader.load();
-        const pageAmt = pageLevelDocs.length;
+        const pagesAmt = pageLevelDocs.length;
+        const isProExceeded =
+          pagesAmt > PLANS.find((plan) => plan.name === "Pro")!.pagesPerPdf;
+        const isFreeExceeded =
+          pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf;
+        if (
+          (isSubscribed && isProExceeded && size > maxFileSizeProPlan) ||
+          (!isSubscribed && isFreeExceeded && size > maxFileSizeFreePlan)
+        ) {
+          await db.file.update({
+            data: {
+              uploadStatus: "FAILED",
+            },
+            where: {
+              id: newFile.id,
+            },
+          });
+        }
         // vectorize and index entire document
         const pinecone = await getPineconeClient();
         const pineconeIndex = pinecone.Index("feather");
