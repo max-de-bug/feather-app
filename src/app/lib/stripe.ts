@@ -2,9 +2,9 @@ import { PLANS } from "@/config/stripe";
 import { db } from "@/db";
 
 import Stripe from "stripe";
-import { AuthContext } from "../context/authContex";
+// import { AuthContext } from "../context/authContex";
 import { redirect } from "next/navigation";
-import { Context, useContext } from "react";
+// import { Context, useContext } from "react";
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
   apiVersion: "2023-10-16",
@@ -14,9 +14,15 @@ export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY ?? "", {
 export async function getUserSubscriptionPlan() {
   // const { getUser } = getKindeServerSession()
   // const user = getUser()
-  const user = useContext(AuthContext);
-  if (!user) redirect(`/sign-in`);
+  // const user = useContext(AuthContext);
+  // if (!user) redirect(`/sign-in`);
 
+  const user = {
+    id: "1",
+    name: "test",
+    email: "test",
+    picture: "test",
+  };
   if (!user.id) {
     return {
       ...PLANS[0],

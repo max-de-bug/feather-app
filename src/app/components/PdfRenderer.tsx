@@ -17,7 +17,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 import {
   DropdownMenu,
   DropdownMenuContent,

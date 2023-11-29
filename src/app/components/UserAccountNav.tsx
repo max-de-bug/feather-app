@@ -1,4 +1,4 @@
-import { Avatar } from "@radix-ui/react-avatar";
+import { Avatar } from "./ui/avatar";
 import { getUserSubscriptionPlan } from "../lib/stripe";
 import { Button } from "./ui/button";
 import {
@@ -13,8 +13,6 @@ import { AvatarFallback } from "./ui/avatar";
 import { Icons } from "./icons";
 import Link from "next/link";
 import { Gem } from "lucide-react";
-import { useContext } from "react";
-import { AuthContext } from "../context/authContex";
 
 interface UserAccountNavProps {
   email: string | undefined;
@@ -27,7 +25,6 @@ const UserAccountNav = async ({
   imageUrl,
   name,
 }: UserAccountNavProps) => {
-  const { logout, user } = useContext(AuthContext);
   const subscriptionPlan = await getUserSubscriptionPlan();
   return (
     <DropdownMenu>

@@ -2,14 +2,15 @@ import Link from "next/link";
 import MaxWidthWrapper from "./MaxWidthWrapper";
 import { buttonVariants } from "./ui/button";
 import { ArrowRight } from "lucide-react";
-import { useContext } from "react";
-import { AuthContext } from "../context/authContex";
 import UserAccountNav from "./UserAccountNav";
 import MobileNav from "./MobileNav";
 
 const Navbar = () => {
-  const user = useContext(AuthContext);
-  // if(!user) redirect(`/auth-callback/origin=dashboard/${fileid}`)
+  const user = {
+    name: "test",
+    email: "test",
+    picture: "test",
+  };
   return (
     <nav className="sticky h-14 inset-x-0 top-0 z-30 w-full border-0 border-gray-200 bg-white/75 backdrop-blur-lg transition-all">
       <MaxWidthWrapper>
@@ -57,7 +58,6 @@ const Navbar = () => {
                 />
               </>
             )}
-            M
           </div>
         </div>
       </MaxWidthWrapper>

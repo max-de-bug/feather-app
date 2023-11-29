@@ -1,4 +1,3 @@
-import { AuthContext } from "@/app/context/authContex";
 import { openai } from "@/app/lib/openai";
 import { getPineconeClient } from "@/app/lib/pinecone";
 import { SendMessageValidator } from "@/app/lib/validators/SendMessageValidator";
@@ -6,13 +5,13 @@ import { db } from "@/db";
 import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { PineconeStore } from "langchain/vectorstores/pinecone";
 import { NextRequest } from "next/server";
-import { useContext } from "react";
+
 import { OpenAIStream, StreamingTextResponse } from "ai";
 export const POST = async (req: NextRequest) => {
   // endpoint for asking a question to a pdf file
 
   const body = await req.json();
-  const { user } = useContext(AuthContext);
+  // const { user } = useContext(AuthContext);
   // if (!user) {
   //   redirect("/auth-callback?origin=dashboard");
   // return new Response("Unauthorized", {status: 401})

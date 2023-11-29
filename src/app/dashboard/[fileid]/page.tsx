@@ -1,9 +1,10 @@
 import ChatWrapper from "@/app/components/chat/ChatWrapper";
 import PdfRenderer from "@/app/components/PdfRenderer";
-import { AuthContext } from "@/app/context/authContex";
+import { getUserSubscriptionPlan } from "@/app/lib/stripe";
+
 import { db } from "@/db";
 import { notFound, redirect } from "next/navigation";
-import { useContext } from "react";
+
 interface PageProps {
   params: {
     fileid: string;
@@ -13,14 +14,14 @@ interface PageProps {
 const Page = async ({ params }: PageProps) => {
   const { fileid } = params;
 
-  // const user = useContext(AuthContext)
-  // if(!user) redirect(`/auth-callback/origin=dashboard/${fileid}`)
   const file = await db.file.findFirst({
     where: {
       id: fileid,
     },
   });
   if (!file) return notFound;
+  const plan = await getUserSubscriptionPlan();
+
   return (
     <div className="flex-1 justify-between flex flex-col h=[calc(100vh-3.5rem)]">
       <div className="mx-auto w-full max-w-8x1 grow lg:flex xl:px-2">
@@ -31,7 +32,7 @@ const Page = async ({ params }: PageProps) => {
           </div>
         </div>
         <div className="shrink-0 flex-[0.75] border-t border-gray-200 lg:w-96 lg:border-l lg:border-t-0">
-          <ChatWrapper fileId={file.id} />
+          <ChatWrapper isSubscribed={plan.isSubscribed} fileId={file.id} />
         </div>
       </div>
     </div>

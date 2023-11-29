@@ -8,7 +8,7 @@ import { AuthProvider } from "./context/authContex";
 import "react-loading-skeleton/dist/skeleton.css";
 import "simplebar-react/dist/simplebar.min.css";
 import { Toaster } from "./components/ui/toaster";
-import { constructMetadata } from "@/lib/utils";
+import { constructMetadata } from "@/app/lib/utils";
 
 const inter = Inter({ subsets: ["latin"] });
 

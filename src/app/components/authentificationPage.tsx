@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 import { buttonVariants } from "@/app/components/ui/button";
 import UserAuthForm from "@/app/components/userAuthForm/userAuthForm";
 

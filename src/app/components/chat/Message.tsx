@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 import { ExtendedMessage } from "@/types/message";
 import { Icons } from "../icons";
 import ReactMarkdown from "react-markdown";

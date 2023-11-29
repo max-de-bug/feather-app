@@ -1,5 +1,5 @@
-import { useContext } from "react";
-import { AuthContext } from "../context/authContex";
+// import { useContext } from "react";
+// import { AuthContext } from "../context/authContex";
 import { redirect } from "next/navigation";
 import Dashboard from "../components/Dashboard";
 import { getUserSubscriptionPlan } from "../lib/stripe";

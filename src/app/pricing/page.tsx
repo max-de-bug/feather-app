@@ -6,7 +6,7 @@ import {
   TooltipTrigger,
 } from "../components/ui/tooltip";
 import { PLANS } from "@/config/stripe";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils";
 import { ArrowRight, Check, HelpCircle, Minus } from "lucide-react";
 import { buttonVariants } from "../components/ui/button";
 import Link from "next/link";
@@ -17,6 +17,11 @@ const Page = () => {
   // if (!user) {
   //   redirect("/auth-callback?origin=dashboard");
   // }
+  const user = {
+    name: "test",
+    email: "test",
+    picture: "test",
+  };
   const pricingItems = [
     {
       plan: "Free",

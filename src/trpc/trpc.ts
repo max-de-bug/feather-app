@@ -6,7 +6,7 @@ import { CreateContextOptions } from "vm";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 const t = initTRPC.create();
 const middleware = t.middleware;
-const isAuth = middleware(async (opts) => {
+const isAuth = middleware((opts) => {
   // const user = useContext(AuthContext);
   // if (!user) {
   //   throw new TRPCError({ code: "UNAUTHORIZED" });
