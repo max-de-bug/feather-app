@@ -29,7 +29,7 @@
     "@trpc/client": "^10.43.1",
     "@trpc/next": "^10.43.1",
     "@trpc/react-query": "^10.43.1",
-    "@trpc/server": "^10.43.1",
+    "@trpc/server": "^10.43.3",
     "ai": "^2.2.25",
     "aws-sdk": "^2.1494.0",
     "axios": "^1.6.2",
