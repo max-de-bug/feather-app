@@ -1,21 +1,20 @@
 "use client";
 import {
   Ghost,
-  Loader,
   Loader2,
   MessageSquare,
   Plus,
   Trash,
+  FileText,
+  Calendar,
 } from "lucide-react";
 import UploadButton from "./UploadButton";
-
 import { trpc } from "@/app/components/_trpc/client";
-import Skeleton from "react-loading-skeleton";
 import Link from "next/link";
-// import { format } from "data-fns";
 import { Button } from "./ui/button";
 import { useState } from "react";
 import { getUserSubscriptionPlan } from "../lib/stripe";
+import { format } from "date-fns";
 
 interface PageProps {
   subscriptionPlan: Awaited<ReturnType<typeof getUserSubscriptionPlan>>;
@@ -41,13 +40,24 @@ const Dashboard = ({ subscriptionPlan }: PageProps) => {
 
   return (
     <main className="mx-auto max-w-7xl md:p-10">
-      <div className="mt-8 flex flex-col items-start justify-between gap-4 border-b border-gray-200 pb-5 sm:flex-row sm:items-center sm:gap-0 ">
-        <h1 className="mb-3 font-bold text-5xl text-gray-900">My Files</h1>
-        <UploadButton isSubscribed={subscriptionPlan.isSubscribed} />
+      {/* Modern Header Section */}
+      <div className="flex flex-col gap-4 pb-8">
+        <div className="flex items-center justify-between">
+          <h1 className="text-5xl font-bold text-slate-800">
+            My Documents
+            <span className="text-sm font-normal text-slate-500 ml-2">
+              ({files?.length || 0} files)
+            </span>
+          </h1>
+          <UploadButton isSubscribed={subscriptionPlan.isSubscribed} />
+        </div>
+
+        <div className="h-0.5 bg-gradient-to-r from-blue-500/20 via-blue-500/10 to-transparent" />
       </div>
-      {/* display all user files */}
+
+      {/* File Display Section */}
       {files && files.length !== 0 ? (
-        <ul className="mt-8 grid grid-cols-1 gap-6 divide-y divide-zinc-200 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {files
             .sort(
               (a, b) =>
@@ -55,57 +65,78 @@ const Dashboard = ({ subscriptionPlan }: PageProps) => {
                 new Date(a.createdAt).getTime()
             )
             .map((file) => (
-              <li
+              <div
                 key={file.id}
-                className="col-span-1 divide-y divide-gray-200 rounded-lg bg-white shadow transition hover:shadow-lg"
+                className="group relative bg-white rounded-2xl border border-blue-100 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden"
               >
+                {/* Card Header */}
                 <Link
                   href={`/dashboard/${file.id}`}
-                  className="flex flex-col gap-2"
+                  className="block p-6 hover:bg-blue-50/50 transition-colors"
                 >
-                  <div className="pt-6 px-6 flex w=full items-center justify-between space-x-6">
-                    <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500" />
-                    <div className="flex-1 truncate">
-                      <div className="flex items-center space-x-3  ">
-                        <h3 className="truncate text-lg font-medium text-zinc-900">
-                          {file.name}
-                        </h3>
+                  <div className="flex items-center space-x-4">
+                    <div className="p-2 bg-blue-500/10 rounded-lg">
+                      <FileText className="h-6 w-6 text-blue-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h2 className="text-lg font-semibold text-slate-800 truncate">
+                        {file.name}
+                      </h2>
+                      <div className="flex items-center gap-2 text-sm text-slate-500">
+                        <Calendar className="h-4 w-4" />
+                        {format(new Date(file.createdAt), "MMM dd, yyyy")}
                       </div>
                     </div>
                   </div>
                 </Link>
-                <div className="px-6 mt-4 grid grid-cols-3 place-items-center py-2 gap-6 text-xs text-zinc-500">
-                  <div className="flex items-center gap-2">
-                    <Plus className="h-4 w-4" />
-                    {/* {format(new Date(file.createdAt), "MMM yyyy")} */}
+
+                {/* Card Footer */}
+                <div className="p-4 bg-slate-50 border-t border-blue-100">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2 text-sm text-slate-600">
+                      <MessageSquare className="h-4 w-4 text-blue-500" />
+                      <span>12 messages</span>
+                    </div>
+                    <Button
+                      onClick={() => deleteFile({ id: file.id })}
+                      size="sm"
+                      variant="ghost"
+                      className="hover:bg-red-50 hover:text-red-600 transition-colors"
+                    >
+                      {currentDeletingFile === file.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Trash className="h-4 w-4" />
+                      )}
+                    </Button>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-4 w-4" />
-                    mocked
-                  </div>
-                  <Button
-                    onClick={() => deleteFile({ id: file.id })}
-                    size="sm"
-                    className="w full"
-                    variant="destructive"
-                  >
-                    {currentDeletingFile === file.id ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Trash className="h-4 w-4" />
-                    )}
-                  </Button>
                 </div>
-              </li>
+
+                {/* Hover Effect Overlay */}
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/0 to-blue-500/0 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
+              </div>
             ))}
-        </ul>
+        </div>
       ) : isLoading ? (
-        <Skeleton height={100} className="my-2" count={3} />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => (
+            <div
+              key={i}
+              className="h-48 rounded-2xl bg-slate-100 animate-pulse"
+            />
+          ))}
+        </div>
       ) : (
         <div className="mt-16 flex flex-col items-center gap-2">
-          <Ghost className="h-8 w-8 text-zinc-800" />
-          <h3 className="font-semibold text-xl">Pretty empty around here</h3>
-          <p>Let&apos;s upload your pdf</p>
+          <div className="p-4 bg-blue-50/50 rounded-full">
+            <Ghost className="h-8 w-8 text-blue-500" />
+          </div>
+          <h3 className="font-semibold text-xl text-slate-800">
+            Pretty empty around here
+          </h3>
+          <p className="text-slate-600">
+            Let&apos;s upload your first document
+          </p>
         </div>
       )}
     </main>

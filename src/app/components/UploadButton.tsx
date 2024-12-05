@@ -175,7 +175,7 @@ const UploadButton = ({ isSubscribed }: { isSubscribed: boolean }) => {
       }}
     >
       <DialogTrigger onClick={() => setIsOpen(true)} asChild>
-        <Button>Upload PDF</Button>
+        <Button className="rounded-2xl">Upload PDF</Button>
       </DialogTrigger>
       <DialogContent>
         <UploadDropzone isSubscribed={isSubscribed} />
