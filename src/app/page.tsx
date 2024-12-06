@@ -36,7 +36,7 @@ export default function Home() {
           className={buttonVariants({
             size: "lg",
             className:
-              "rounded-2xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all duration-300 hover:shadow-blue-200/50 hover:shadow-xl",
+              "rounded-3xl bg-blue-600 hover:bg-blue-500 text-white shadow-lg transition-all duration-300 hover:shadow-blue-200/50 hover:shadow-xl",
           })}
           href="/dashboard"
           target="_blank"
@@ -146,57 +146,6 @@ export default function Home() {
           </div>
         </div>
       </div>
-      <style jsx global>{`
-        @keyframes pulse {
-          0%,
-          100% {
-            transform: scale(1);
-            opacity: 0.2;
-          }
-          50% {
-            transform: scale(1.5);
-            opacity: 0.4;
-          }
-        }
-
-        .mesh-gradient {
-          background-image: radial-gradient(
-              at 40% 20%,
-              hsla(212, 98%, 85%, 1) 0px,
-              transparent 50%
-            ),
-            radial-gradient(
-              at 80% 0%,
-              hsla(212, 98%, 85%, 1) 0px,
-              transparent 50%
-            ),
-            radial-gradient(
-              at 0% 50%,
-              hsla(212, 98%, 85%, 1) 0px,
-              transparent 50%
-            ),
-            radial-gradient(
-              at 80% 50%,
-              hsla(212, 98%, 85%, 1) 0px,
-              transparent 50%
-            ),
-            radial-gradient(
-              at 0% 100%,
-              hsla(212, 98%, 85%, 1) 0px,
-              transparent 50%
-            ),
-            radial-gradient(
-              at 80% 100%,
-              hsla(212, 98%, 85%, 1) 0px,
-              transparent 50%
-            ),
-            radial-gradient(
-              at 0% 0%,
-              hsla(212, 98%, 85%, 1) 0px,
-              transparent 50%
-            );
-        }
-      `}</style>
     </>
   );
 }
