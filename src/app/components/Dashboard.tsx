@@ -95,25 +95,24 @@ const Dashboard = ({ subscriptionPlan }: PageProps) => {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2 text-sm text-slate-600">
                       <MessageSquare className="h-4 w-4 text-blue-500" />
-                      <span>12 messages</span>
+                      <span>0 messages</span>
                     </div>
                     <Button
                       onClick={() => deleteFile({ id: file.id })}
                       size="sm"
                       variant="ghost"
-                      className="hover:bg-red-50 hover:text-red-600 transition-colors"
+                      className="hover:bg-red-50 hover:text-red-600 hover:rounded-full transition-colors"
                     >
                       {currentDeletingFile === file.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
                       ) : (
-                        <Trash className="h-4 w-4" />
+                        <Trash className="h-4 w-4 cursor-pointer" />
                       )}
                     </Button>
                   </div>
                 </div>
 
                 {/* Hover Effect Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/0 to-blue-500/0 opacity-0 group-hover:opacity-10 transition-opacity duration-300" />
               </div>
             ))}
         </div>
