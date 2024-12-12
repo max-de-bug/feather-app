@@ -4,6 +4,7 @@ import { getUserSubscriptionPlan } from "@/app/lib/stripe";
 
 import { db } from "@/db";
 import { notFound, redirect } from "next/navigation";
+import { boolean } from "zod";
 
 interface PageProps {
   params: {
@@ -20,7 +21,10 @@ const Page = async ({ params }: PageProps) => {
     },
   });
   if (!file) return notFound;
-  const plan = await getUserSubscriptionPlan();
+  //  const plan = await getUserSubscriptionPlan();
+  const plan = {
+    isSubscribed: false,
+  };
 
   return (
     <div className="flex-1 justify-between flex flex-col h=[calc(100vh-3.5rem)]">

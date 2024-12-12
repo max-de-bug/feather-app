@@ -167,16 +167,14 @@ export const appRouter = router({
         const response = await fetch(signedURL);
         const blob = await response.blob();
         const loader = new PDFLoader(blob);
-        const pageLevelDocs = await loader.load();
-        const pagesAmt = pageLevelDocs.length;
-        const isProExceeded =
-          pagesAmt > PLANS.find((plan) => plan.name === "Pro")!.pagesPerPdf;
-        const isFreeExceeded =
-          pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf;
-        if (
-          (isSubscribed && isProExceeded && size > maxFileSizeProPlan) ||
-          (!isSubscribed && isFreeExceeded && size > maxFileSizeFreePlan)
-        ) {
+        console.log(blob);
+
+        // Attempt to load the PDF and handle errors
+        let pageLevelDocs;
+        try {
+          pageLevelDocs = await loader.load();
+        } catch (error) {
+          console.error("Error loading PDF:", error);
           await db.file.update({
             data: {
               uploadStatus: "FAILED",
@@ -185,7 +183,24 @@ export const appRouter = router({
               id: newFile.id,
             },
           });
+          return { signedURL, newFile, error: "Invalid PDF structure" }; // Return error information
         }
+        // const pagesAmt = pageLevelDocs.length;
+        // // const isProExceeded =
+        // //   pagesAmt > PLANS.find((plan) => plan.name === "Pro")!.pagesPerPdf;
+        // // const isFreeExceeded =
+        // //   pagesAmt > PLANS.find((plan) => plan.name === "Free")!.pagesPerPdf;
+        // //
+        // {
+        //   await db.file.update({
+        //     data: {
+        //       uploadStatus: "FAILED",
+        //     },
+        //     where: {
+        //       id: newFile.id,
+        //     },
+        //   });
+        // }
         // vectorize and index entire document
         const pinecone = await getPineconeClient();
         const pineconeIndex = pinecone.Index("feather");
@@ -193,10 +208,10 @@ export const appRouter = router({
           openAIApiKey: process.env.OPEN_AI_KEY!,
         });
         await PineconeStore.fromDocuments(pageLevelDocs, embeddings, {
-          pineconeIndex,
           namespace: newFile.id,
+          pineconeIndex: pineconeIndex as any,
         });
-
+        console.log("pinecone", PineconeStore);
         await db.file.update({
           data: {
             uploadStatus: "SUCCESS",
@@ -206,6 +221,7 @@ export const appRouter = router({
           },
         });
       } catch (error) {
+        console.log(error);
         await db.file.update({
           data: {
             uploadStatus: "FAILED",
