@@ -37,7 +37,7 @@
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
     "jwt-decode": "^4.0.0",
-    "langchain": "^0.0.197-rc.1",
+    "langchain": "^0.3.3",
     "lucide-react": "^0.291.0",
     "next": "14.0.1",
     "nookies": "^2.5.2",
