@@ -100,11 +100,18 @@ export const appRouter = router({
       const subscriptionPlan = await getUserSubscriptionPlan();
       const { isSubscribed } = subscriptionPlan;
 
+      // Plan-based size limits
       const maxFileSizeFreePlan = 1024 * 1024 * 4; // 4MB
       const maxFileSizeProPlan = 1024 * 1024 * 16; // 16MB
-      const acceptedType = "pdf";
-      if (size > maxFileSizeFreePlan) {
-        throw new TRPCError({ code: "FORBIDDEN" });
+      const maxFileSize = isSubscribed ? maxFileSizeProPlan : maxFileSizeFreePlan;
+      if (!Number.isFinite(size) || size <= 0) {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Invalid file size" });
+      }
+      if (size > maxFileSize) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: `Max file size is ${isSubscribed ? "16MB" : "4MB"}`,
+        });
       }
       if (!key.includes(acceptedType)) {
         throw new TRPCError({ code: "FORBIDDEN" });
@@ -118,17 +125,23 @@ export const appRouter = router({
       //   },
       // });
 
+      // Basic duplicate detection by name within user scope
       const isFileExists = await db.file.findFirst({
         where: {
           key: key,
           userId,
         },
       });
-      if (isFileExists) return;
+      if (isFileExists) {
+        throw new TRPCError({ code: "CONFLICT", message: "A file with the same name already exists" });
+      }
+      // Always generate and use a server-side S3 key
+      const s3Key = `${userId}/${generateFileName()}.pdf`;
+
       const putObjectCommand = new PutObjectCommand({
         Bucket: process.env.BUCKET_NAME!,
-        Key: generateFileName(),
-        ContentType: key,
+        Key: s3Key,
+        ContentType: "application/pdf",
         ContentLength: size,
         ChecksumSHA256: checksum,
         Metadata: {
@@ -141,7 +154,7 @@ export const appRouter = router({
 
       const newFile = await db.file.create({
         data: {
-          key: key,
+          key: s3Key,
           name: name,
           userId: userId,
           uploadStatus: "PROCESSING",
