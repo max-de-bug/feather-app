@@ -82,22 +82,7 @@ export const appRouter = router({
       },
     });
   }),
-  // uploadFile: privateProcedure.mutation(async (ctx) => {
-  //   const ex = (req.query.fileType as string).split("/")[1]; // Use ctx.input
-  //   const key = `${randomUUID()}.${ex}`;
 
-  //   const s3Params = {
-  //     Bucket: process.env.BUCKET_NAME,
-  //     Key: key, // Corrected to 'Key' from 'key'
-  //     Expires: 60,
-  //     ContentType: `image/${ex}`,
-  //   };
-  //   const uploadUrl = await s3.getSignedUrl("putObject", s3Params);
-  //   return {
-  //     uploadUrl,
-  //     key,
-  //   };
-  // }),
   uploadFile: privateProcedure
     .input(
       z.object({
@@ -249,13 +234,7 @@ export const appRouter = router({
           id: input.id,
         },
       });
-      // const s3 = new S3Client({
-      //   region: process.env.REGION!,
-      //   credentials: {
-      //     accessKeyId: process.env.ACCESS_KEY!,
-      //     secretAccessKey: process.env.SECRET_KEY!,
-      //   },
-      // });
+     
       if (file) {
         const url = file.url;
         const key = url.split("/").slice(-1)[0];
