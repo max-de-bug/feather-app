@@ -18,46 +18,48 @@ const Navbar = async () => {
           <Link href="/" className="flex z-40 font-semibold">
             <span>Feather.</span>
           </Link>
-          <MobileNav isAuth={!!user} />
-          <div className="hidden items-center space-x-4 sm:flex">
-            {!user ? (
-              <>
-                <Link
-                  href="/pricing"
-                  className={buttonVariants({
-                    variant: "ghost",
-                    size: "sm",
-                  })}
-                >
-                  Pricing
-                </Link>
-                <Link
-                  href="/register"
-                  className={buttonVariants({
-                    size: "sm",
-                  })}
-                >
-                  Sign in <ArrowRight className="ml-1.5 h-5 w-5" />
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/dashboard"
-                  className={buttonVariants({
-                    variant: "ghost",
-                    size: "sm",
-                  })}
-                >
-                  Dashboard
-                </Link>
-                <UserAccountNav
-                  name={!user.name ? "Your Account" : `${user.name}`}
-                  email={user.email ?? ""}
-                  imageUrl={user.picture ?? ""}
-                />
-              </>
-            )}
+          <div className="flex items-center gap-4">
+            <MobileNav isAuth={!!user} />
+            <div className="hidden items-center space-x-4 sm:flex">
+              {!user ? (
+                <>
+                  <Link
+                    href="/pricing"
+                    className={buttonVariants({
+                      variant: "ghost",
+                      size: "sm",
+                    })}
+                  >
+                    Pricing
+                  </Link>
+                  <Link
+                    href="/register"
+                    className={buttonVariants({
+                      size: "sm",
+                    })}
+                  >
+                    Sign in <ArrowRight className="ml-1.5 h-5 w-5" />
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/dashboard"
+                    className={buttonVariants({
+                      variant: "ghost",
+                      size: "sm",
+                    })}
+                  >
+                    Dashboard
+                  </Link>
+                  <UserAccountNav
+                    name={!user.name ? "Your Account" : `${user.name}`}
+                    email={user.email ?? ""}
+                    imageUrl={user.picture ?? ""}
+                  />
+                </>
+              )}
+            </div>
           </div>
         </div>
       </MaxWidthWrapper>
