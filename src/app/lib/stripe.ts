@@ -32,11 +32,36 @@ export async function getUserSubscriptionPlan() {
     };
   }
 
-  const dbUser = await db.user.findFirst({
-    where: {
-      id: user.id,
-    },
-  });
+  let dbUser;
+  try {
+    dbUser = await db.user.findFirst({
+      where: {
+        id: user.id,
+      },
+    });
+  } catch (error: any) {
+    // Database connection error - return default plan
+    // Handle circuit breaker and authentication errors gracefully
+    const errorMessage = error?.message || String(error);
+    if (
+      errorMessage.includes("Circuit breaker") ||
+      errorMessage.includes("authentication") ||
+      errorMessage.includes("FATAL")
+    ) {
+      console.warn(
+        "Database connection issue (circuit breaker or auth error). Using default plan.",
+        errorMessage
+      );
+    } else {
+      console.error("Database connection error:", error);
+    }
+    return {
+      ...PLANS[0],
+      isSubscribed: false,
+      isCanceled: false,
+      stripeCurrentPeriodEnd: null,
+    };
+  }
 
   if (!dbUser) {
     return {
@@ -59,10 +84,16 @@ export async function getUserSubscriptionPlan() {
 
   let isCanceled = false;
   if (isSubscribed && dbUser.stripeSubscriptionId) {
-    const stripePlan = await stripe.subscriptions.retrieve(
-      dbUser.stripeSubscriptionId
-    );
-    isCanceled = stripePlan.cancel_at_period_end;
+    try {
+      const stripePlan = await stripe.subscriptions.retrieve(
+        dbUser.stripeSubscriptionId
+      );
+      isCanceled = stripePlan.cancel_at_period_end;
+    } catch (error) {
+      // Stripe API error - assume not canceled
+      console.error("Stripe API error:", error);
+      isCanceled = false;
+    }
   }
 
   return {
