@@ -42,9 +42,11 @@
     "langchain": "^0.0.197-rc.1",
     "lucide-react": "^0.291.0",
     "next": "14.0.1",
+    "next-auth": "^4.24.13",
     "nookies": "^2.5.2",
     "openai": "^4.20.0",
     "pdf-parse": "^1.1.1",
+    "pg": "^8.16.3",
     "react": "^18",
     "react-dom": "^18",
     "react-dropzone": "^14.2.3",
@@ -66,11 +68,13 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
+    "concurrently": "^9.2.1",
+    "dotenv": "^17.2.3",
     "eslint": "^8",
     "eslint-config-next": "14.0.1",
     "postcss": "^8",
     "prisma": "^7.2.0",
     "tailwindcss": "^3.3.0",
-    "typescript": "^5"
+    "typescript": "5.9.3"
   }
 }
