@@ -43,7 +43,7 @@ export const POST = async (req: NextRequest) => {
   const pineconeIndex = pinecone.Index("feather");
 
   const vectorStore = await PineconeStore.fromExistingIndex(embeddings, {
-    pineconeIndex,
+    pineconeIndex: pineconeIndex as any,
     namespace: fileId,
   });
   const results = await vectorStore.similaritySearch(message, 4);

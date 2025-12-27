@@ -35,3 +35,54 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# personal files and directories
+.Ld9VirtualBox/
+.VirtualBox/
+.android/
+.avm/
+.bash_history
+.bundle/
+.cache/
+.cargo/
+.chocolatey/
+.codeium/
+.cursor/
+.docker/
+.gitconfig
+.gk/
+.ipython/
+.kube/
+.lesshst
+.local/
+.minikube/
+.node_repl_history
+.pnpm-cache/
+.pnpm/
+.rustup/
+.vscode/
+.windsurf/
+3D Objects/
+;;;/
+AppData/
+Books/
+Camera/
+Contacts/
+Downloads/
+Favorites/
+IntelGraphicsProfiles/
+Khristina docs/
+Khristina projects/
+Links/
+Music/
+NTUSER.DAT*
+ntuser.dat*
+ntuser.ini
+Pop-icons/
+Saved Games/
+Searches/
+Tracing/
+Twitter/
+Videos/
+*.backup
+*.local
